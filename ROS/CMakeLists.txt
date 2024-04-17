@@ -1,0 +1,1 @@
+add_subdirectory(ros_esmacat_applications)

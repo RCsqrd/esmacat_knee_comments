@@ -1,0 +1,20 @@
+"added file that generates trajectories and its header"
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch main
+# Your branch is up to date with 'origin/main'.
+#
+# Changes to be committed:
+#	new file:   CMakeLists.txt
+#	new file:   trajectory_generation.cpp
+#	new file:   trajectory_generation.h
+#
+# Changes not staged for commit:
+#	modified:   sensojoint_master (new commits, modified content, untracked content)
+#
+# Untracked files:
+#	PROVAC2.cpp
+#	PROVAH2.h
+#	Rep_data.csv
+#

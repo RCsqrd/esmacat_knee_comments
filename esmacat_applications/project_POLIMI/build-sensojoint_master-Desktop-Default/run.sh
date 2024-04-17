@@ -1,0 +1,2 @@
+sudo ./sensojoint_master &
+sudo /home/esmacat/Desktop/esmacat_rt_restore/esmacat_master_high_performance/esmacat_applications/build-sensojoint_master-Desktop-Default/esmacat_core/application/ecat_main

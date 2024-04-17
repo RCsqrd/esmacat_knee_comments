@@ -1,0 +1,15 @@
+<launch> 
+    <!-- Parameters Used -->
+    <!-- name is any custom name -->
+    <!-- pkg is the name of the ROS Package -->
+    <!-- type is the name of the node(executable) defined prior -->
+    <!-- output = screen displays the output on the terminal Default is ROS_LOG -->
+    <!-- launch-prefix gives instructions as to how to launch the node -->
+
+    <!-- EtherCAT Main Node -->
+    <node name = "Esmacat_EtherCAT_node" pkg = "esmacat_high_performance" type = "ecat_main" output = "screen" launch-prefix = "mate-terminal --command"/>
+
+    <!-- Esmacat Node -->
+    <node name = "Esmacat_application_node" pkg = "esmacat_high_performance" type = "esmacat_node_2_ease" output = "screen" launch-prefix = "mate-terminal --command"/>
+    
+</launch>

@@ -1,0 +1,1 @@
+/usr/bin/g++     CMakeFiles/sensojoint_master_interface.dir/sensojoint_shared_memory.cpp.o CMakeFiles/sensojoint_master_interface.dir/interface_main.cpp.o CMakeFiles/sensojoint_master_interface.dir/sensojoint_interface.cpp.o  -o sensojoint_master_interface  -L/home/esmacat/Desktop/esmacat_rt_restore/esmacat_master_high_performance/esmacat_applications/sensojoint_master 
