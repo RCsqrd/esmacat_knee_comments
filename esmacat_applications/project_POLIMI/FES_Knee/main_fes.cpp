@@ -5,6 +5,7 @@
 #include "sensojoint_fes_manager.h"
 #include "sensojoint_fes_app.h"
 
+//in the code update the path of the calibration file
 
 stimulation stim;
 
@@ -45,13 +46,12 @@ static void getinfo ()
 
 int main(){
 
-
 //        // Plogger initialization
 //        static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender; // Create appender.
 //        plog::init(plog::info,&consoleAppender);
-////        PLOGI << "Version " << POSIX;
+////      PLOGI << "Version " << POSIX;
 //        PLOGW << "Main thread";
-        getinfo();
+    getinfo();
 
 //        // Scheduler variables
 //        int policy;
@@ -64,47 +64,48 @@ int main(){
 //                exit(1);
 //            }
 
-        sensojoint_FES_manager FES_manager;
-        sensojoint_fes_app FES_app;
+    sensojoint_FES_manager FES_manager;
+    sensojoint_fes_app FES_app;
 
-        // Open file with user ID
-           cout << red_key << "Insert user ID: " << color_key;
-           cin >> userID;
-           cout << "your USER ID is: " << userID << "\n" ;
+    // Open file with user ID
+    cout << red_key << "Insert user ID: " << color_key;
+    cin >> userID;
+    cout << "your USER ID is: " << userID << "\n" ;
 
+    char buffer [80];
+    FILE *file;
 
-           char buffer [80];
-           FILE *file;
+    // Open user-specific calibration file
+    snprintf (buffer,80,"/home/esmacat/esmacat_rt/build-release/esmacat_applications/calib_FES_%s.csv", userID);
 
-           // Open user-specific calibration file
-           snprintf (buffer,80,"/home/esmacat/esmacat_rt/build-release/esmacat_applications/calib_FES_%s.csv", userID);
+    /*
+    If the user calibration file already exists, a message is printed. 
+    Otherwise, a new calibration file is created using the FES_app object.
+    */
+    if ((file = fopen(buffer,"r"))){
+        fclose(file);
+        cout << red_key << "USER calibration file exists" << color_key << endl;
+    } else {
+        cout << yellow_key << "USER calibration file does not exist" << color_key << endl;
+        FES_app.open_calibration_file();
+        FES_app.write_calibration_file();
+        FES_app.close_calibration_file();
 
-           if ((file = fopen(buffer,"r"))){
-               fclose(file);
-               cout << red_key << "USER calibration file exists" << color_key << endl;
-           } else {
-               cout << yellow_key << "USER calibration file does not exist" << color_key << endl;
-               FES_app.open_calibration_file();
-               FES_app.write_calibration_file();
-               FES_app.close_calibration_file();
+        FES_app.open_ROM_file();
+        FES_app.write_ROM_file();
+        FES_app.close_ROM_file();
+    }
 
-               FES_app.open_ROM_file();
-               FES_app.write_ROM_file();
-               FES_app.close_ROM_file();
-           }
+    FES_app.open_sensojoint_file();
 
-        FES_app.open_sensojoint_file();
+    // Start threads (real-time and non-real-time)
+    FES_manager.start_nrt_thread();
+    FES_manager.start_rt_thread();
 
-        // Start threads (real-time and non-real-time)
-        FES_manager.start_nrt_thread();
-        FES_manager.start_rt_thread();
+    // Threads need to join for clean quit
+    FES_manager.join_nrt_thread();
+    FES_manager.join_rt_thread();
 
-        // Threads need to join for clean quit
-        FES_manager.join_nrt_thread();
-        FES_manager.join_rt_thread();
-
-        return 0;
-
-
+    return 0;
 
 }

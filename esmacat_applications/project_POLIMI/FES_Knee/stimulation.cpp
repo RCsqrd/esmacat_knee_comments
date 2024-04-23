@@ -2,20 +2,17 @@
 #include "headers.h"
 #include "sensojoint_fes_app.h"
 
-
-stimulation::stimulation()
-{
+stimulation::stimulation(){
 
 }
-
 
 void stimulation::initialize_stimulation(){
 
     smpt_open_serial_port(&device, port_name);
-    smpt_clear_ml_init(&ml_init);
+    smpt_clear_ml_init(&ml_init); // clear the ml_init structure to hold init parameters for the device
     ml_init.packet_number = smpt_packet_number_generator_next(&device);
-    smpt_send_ml_init(&device, &ml_init);
-    smpt_clear_ml_update(&ml_update);
+    smpt_send_ml_init(&device, &ml_init);// send the ml_init structure to the device
+    smpt_clear_ml_update(&ml_update); // clear the ml_update structure to hold update parameters for the device
 
     ml_update.enable_channel[Smpt_Channel_Red] = true;
     ml_update.packet_number = smpt_packet_number_generator_next(&device);
@@ -23,7 +20,7 @@ void stimulation::initialize_stimulation(){
     cout << "Stimulator initialization done" << endl;
 }
 
-
+// ll= low level
 void stimulation::initialize_ll_stimulation(){
 
     smpt_open_serial_port(&device, port_name);
@@ -37,7 +34,6 @@ void stimulation::initialize_ll_stimulation(){
 }
 
 void stimulation::stimulate(){
-
 
     ml_update.channel_config[Smpt_Channel_Red].number_of_points = Number_of_points;
     ml_update.channel_config[Smpt_Channel_Red].ramp = Ramp;
@@ -55,13 +51,13 @@ void stimulation::stimulate(){
 
     // Send packet
     Smpt_ml_get_current_data ml_get_current_data = {0};
-    ml_get_current_data.packet_number = smpt_packet_number_generator_next(&device);
+    ml_get_current_data.packet_number = smpt_packet_number_generator_next(&device); 
     ml_get_current_data.data_selection[Smpt_Ml_Data_Stimulation] = true;
+
     check_sent=smpt_send_ml_get_current_data(&device, &ml_get_current_data);
 
     cout << "check sent" << check_sent << endl;
     cout << "check data" << check_data << endl;
-
 
 }
 
@@ -70,7 +66,7 @@ void stimulation::lowlevel_stimulate(){
    // cout << "pulse created" << endl;
     ll_channel_config.enable_stimulation = true;
     ll_channel_config.channel = Smpt_Channel_Red;
-    ll_channel_config.number_of_points = 3;
+    ll_channel_config.number_of_points = 3; // number of point in the pulse
     ll_channel_config.packet_number = packet_number;
 
     ll_channel_config.points[0].current = stimulation_current;
@@ -85,7 +81,6 @@ void stimulation::lowlevel_stimulate(){
     packet_number ++;
 
 }
-
 
 void stimulation::lowlevel_stimulate_calib(int current, int durata){
     // generate the single pulse
@@ -108,7 +103,6 @@ void stimulation::lowlevel_stimulate_calib(int current, int durata){
 
     cout << "current" << current << endl;
 }
-
 
 void stimulation::lowlevel_stimulation_close(){
 

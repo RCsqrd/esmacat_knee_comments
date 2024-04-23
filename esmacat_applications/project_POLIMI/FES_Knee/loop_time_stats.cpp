@@ -1,7 +1,7 @@
 #include <cmath>
 #include "loop_time_stats.h"
 
-loop_time_stats::loop_time_stats(string myfile, output_mode m)
+loop_time_stats::loop_time_stats(string myfile, output_mode m) //open the file with the name myfile and output mode m = fileout_only
 {
     mode = m;
     filename_loop_time_stats = myfile;
@@ -23,10 +23,10 @@ loop_time_stats::loop_time_stats(string myfile, output_mode m)
         flag_screen_out = false;
     }
 
-    if ( flag_file_out == true ) ofs.open(myfile);
+    if ( flag_file_out == true ) ofs.open(myfile); // If file output is enabled, open the file
+    
     for (int i=0;i<MAX_LOOP_TIME_FOR_LOOP_TIME_STATS_US;i++) t_loop_time_bins[i] = 0;
-    clock_gettime ( CLOCK_MONOTONIC, &t_now );
-
+    clock_gettime (CLOCK_MONOTONIC, &t_now); // Get the current time
 }
 
 loop_time_stats::~loop_time_stats()
@@ -34,15 +34,16 @@ loop_time_stats::~loop_time_stats()
     if (flag_file_out == true) ofs.close();
 }
 
+// Function to mark the starting point of the loop
 void loop_time_stats::loop_starting_point()
 {
-
     clock_gettime ( CLOCK_MONOTONIC, &t_now );
     t_diff = t_now;
     TIMESPEC_DECREMENT( t_diff, t_prev );
     t_prev = t_now;
     if (cnt++ < NUMBER_OF_FIRST_CYCLES_TO_BE_SKIPPED_FOR_STATS) return; // for the first cycle, do nothing.
-    t_loop_time_us = t_diff.tv_nsec / 1000;
+    t_loop_time_us = t_diff.tv_nsec / 1000; // convert the time difference to microseconds
+    // Update the loop time bins based on the loop time
     if ( t_loop_time_us < 0) t_loop_time_bins[0]++;
     else if ( t_loop_time_us > MAX_LOOP_TIME_FOR_LOOP_TIME_STATS_US-1 ) t_loop_time_bins[MAX_LOOP_TIME_FOR_LOOP_TIME_STATS_US-1]++;
     else t_loop_time_bins[t_loop_time_us]++;
@@ -56,7 +57,7 @@ void loop_time_stats::store_loop_time_stats()
         int init_index = 0;
         int end_index = 0;
         for (int i=0;i<MAX_LOOP_TIME_FOR_LOOP_TIME_STATS_US;i++) {
-            if ( max_count < t_loop_time_bins[i] ) {
+            if (max_count < t_loop_time_bins[i]) {
                 max_index = i;
                 max_count = t_loop_time_bins[i];
             }
@@ -67,6 +68,7 @@ void loop_time_stats::store_loop_time_stats()
                 break;
             }
         }
+        // Find the ending index with non-zero count
         for (int i=MAX_LOOP_TIME_FOR_LOOP_TIME_STATS_US-2;i>0;i--) {
             if (t_loop_time_bins[i] > 0) {
                 end_index = i;
@@ -83,6 +85,7 @@ void loop_time_stats::store_loop_time_stats()
 //        for (int i=0;i<MAX_LOOP_TIME_US;i++) {
 //            cout << t_loop_time_bins[i] << " ";
 //        }
+        //print out a histogram of the loop time
         cout << endl << endl << "Log10 histogram of the loop time within the range of the shortest and longest loop times: \n";
         for (int i=init_index;i< end_index ;i+=SIZE_OF_BINS_FOR_TERMINAL_DISPLAY_US) {
 
@@ -97,6 +100,7 @@ void loop_time_stats::store_loop_time_stats()
         }
         cout << endl;
     }
+    // If file output is enabled, write loop time bins to the file
     if (flag_file_out == true){
         for (int i=0;i<MAX_LOOP_TIME_FOR_LOOP_TIME_STATS_US;i++) {
             ofs << t_loop_time_bins[i] << endl;
