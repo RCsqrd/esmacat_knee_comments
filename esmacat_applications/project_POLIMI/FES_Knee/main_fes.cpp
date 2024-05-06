@@ -1,4 +1,3 @@
-#include "headers.h"
 #include "headers_fes.h"
 #include "stimulation.h"
 #include "chrono"
@@ -27,22 +26,21 @@ stimulation stim;
 
 //}
 
-extern char userID[10];
+extern char userID[10]; //externally define in sensojoint_fes_app.cpp
 
 static void getinfo ()
 {
     struct sched_param param;
     int policy;
 
-    sched_getparam(0, &param);
+    sched_getparam(0, &param); 
     printf("Priority of this process: %d\n\r", param.sched_priority);
 
     pthread_getschedparam(pthread_self(), &policy, &param);
 
     printf("Priority of the thread: %d, current policy is: %d\n\r",
-              param.sched_priority, policy);
+            param.sched_priority, policy);
 }
-
 
 int main(){
 
@@ -51,7 +49,8 @@ int main(){
 //        plog::init(plog::info,&consoleAppender);
 ////      PLOGI << "Version " << POSIX;
 //        PLOGW << "Main thread";
-    getinfo();
+
+    getinfo(); // priority and threads info
 
 //        // Scheduler variables
 //        int policy;
@@ -73,10 +72,10 @@ int main(){
     cout << "your USER ID is: " << userID << "\n" ;
 
     char buffer [80];
-    FILE *file;
+    FILE *file; //file is a pointer to a FILE structure
 
     // Open user-specific calibration file
-    snprintf (buffer,80,"/home/esmacat/esmacat_rt/build-release/esmacat_applications/calib_FES_%s.csv", userID);
+    snprintf (buffer,80,"/home/esmacat/esmacat_rt/build-release/esmacat_applications/calib_FES_%s.csv", userID);// percorso del file da cambiare in base a dove deve essere creato
 
     /*
     If the user calibration file already exists, a message is printed. 
@@ -107,5 +106,4 @@ int main(){
     FES_manager.join_rt_thread();
 
     return 0;
-
 }

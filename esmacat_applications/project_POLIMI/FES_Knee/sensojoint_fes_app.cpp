@@ -1244,10 +1244,10 @@ void sensojoint_fes_app::write_calibration_file(){
   CSV_calibration_file
 
     << 1 << ","
-    << A << ","
-    << B << ","
-    << C << ","
-    << D << ","
+    << A << "," 
+    << B << "," 
+    << C << "," 
+    << D << "," 
 //           << H << ","
 //            << W << ","
 //            << E << "," //coeff_weight_assistance << ","
@@ -1354,9 +1354,10 @@ void sensojoint_fes_app::open_sensojoint_file(){
 
     // Log directory
     strftime (buffer,80,"FES_Knee-%Y-%m-%d-%H-%M-%S.csv",now);
-    CSV_sensojoint_file.open (buffer);
+    CSV_sensojoint_file.open(buffer); //%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!tolto spazio open (buffer)!!!!!
     if(CSV_sensojoint_file.is_open())
     {
+      // PLOG INFO=PLOGI
         PLOGI << "SENSOJOINT Log File Created";
         CSV_sensojoint_file << endl
 
@@ -1402,7 +1403,7 @@ void sensojoint_fes_app::open_sensojoint_file(){
     }
 
     else{
-        PLOGE << "SENSOJOINT Log File Error";
+        PLOGE << "SENSOJOINT Log File Error"; // PLOG ERROR=PLOGE
     }
 }
 
@@ -1498,9 +1499,11 @@ void sensojoint_fes_app::write_ROM_file(){
 
 }
 
-void read_ROM_file( vector <double> &range){
+// Read ROM file: read a specific user calibration file, parse its content, and store it in a vector
+void read_ROM_file(vector <double> &range){
 
     // Open user-specific calibration file
+    // creation of a buffer filled with the path of the file
     char buffer [80];
     snprintf (buffer,80,"/home/esmacat/esmacat_rt/build-release/esmacat_applications/ROM_%s.csv", userID);
     CSV_ROM_read.open(buffer, ios::in);
@@ -1513,60 +1516,48 @@ void read_ROM_file( vector <double> &range){
     // of which the data is required
     int rollnum=1, roll2, count = 0;
 
-
-    // Read the Data from the file
-    // as String Vector
+    // Read the Data from the file as String Vector
     vector<string> row;
     string line, word, temp;
 
-    row.clear();
+    row.clear();// use to remove all elements from the vector
 
-    // read an entire row and
-    // store it in a string variable 'line'
+    // read an entire row and store it in a string variable 'line'
     getline(CSV_ROM_read, line);
-
 
     // used for breaking words
     stringstream s(line);
 
-    // read every column data of a row and
-    // store it in a string variable, 'word'
+    // read every column data of a row and store it in a string variable 'word', until ',' is found
     while (getline(s, word, ',')) {
-
-        // add all the column data
-        // of a row to a vector
+        // add all the column data of a row to the end of the vector
         row.push_back(word);
     }
 
-    // convert string to integer for comparision
+    // convert string (first word) to integer for comparision, assumed to be a roll number
     roll2 = stoi(row[0]);
 
     // Compare the roll number
     if (roll2 == rollnum) {
+      // Print the found data
+      count = 1;
 
-        // Print the found data
-        count = 1;
-
-        range[0]=stod(row[1]);
-        ex_amplitude = range[0];
-
-
+      // second word is converted to a double and stored in the vector range
+      range[0]=stod(row[1]);
+      ex_amplitude = range[0];
     }
 
-    if (count == 0)
-
-        cout << "Record not found\n";// File pointer
-
-
+    if (count == 0) {
+      cout << "Record not found\n";// File pointer
+    }
+    
     if(CSV_ROM_read.is_open())
     {
-        CSV_ROM_read.close();
-        cout << "USER ROM file closed correctly" << endl;
+      CSV_ROM_read.close();
+      cout << "USER ROM file closed correctly" << endl;
     }
 
 }
-
-
 
 void sensojoint_fes_app::generate_betafunction(){
 
