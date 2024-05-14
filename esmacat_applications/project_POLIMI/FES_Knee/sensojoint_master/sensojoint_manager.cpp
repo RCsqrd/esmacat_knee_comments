@@ -371,7 +371,7 @@ void sensojoint_manager::loop(){
 
         case robot_control_mode::impedance_control_beta:
 
-            if (sensojoint_shared_memory.data->modality==802){
+            if (sensojoint_shared_memory.data->modality==802){ // se caso trigger 801 e siamo in 802
                 ind = sensojoint_shared_memory.data->ind_act_pos;
                 P0 = sensojoint_shared_memory.data->betafunction_sm[ind];
             }
@@ -455,6 +455,7 @@ void sensojoint_manager::loop(){
                 // Beta-Function trajectory generation
 
                 if(sensojoint_shared_memory.data->modality==802){
+                    //i punti dell'esercizio sono quelli della traj beta registrata in case 15 (legato a 802)
                     interim_setpoint_exercise = sensojoint_shared_memory.data->betafunction_sm[count];
                 }
 

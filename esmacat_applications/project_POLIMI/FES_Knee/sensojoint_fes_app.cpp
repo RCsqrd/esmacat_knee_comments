@@ -474,18 +474,21 @@ void sensojoint_fes_app::FES_loop(){
       break;
 
       case 15:
+        /*Read ROM file: read a specific user calibration file, parse its content, and store it in a vector
+           ex_amplitude is set in read_ROM_file(range) and pass to the shared memory (c.data->rom).
+           set of some variables for the beta function generation
+        */
         if(change_mode){
           cout << "Generation of the desired offline trajectory";
           read_ROM_file(range);
-          c.data->rom = ex_amplitude;
+          c.data->rom = ex_amplitude;//c.data->rom = amplitude of the exercise
           counter = 0;
           P0_f = EXERCISE_START_BETA;
           P2_f = 0.0;
           P3_f = 5.0; //5ht Order
           P4_f = P2_f+EXERCISE_DURATION;
           P5_f = 5.0; //5th Order
-          P1_f = (c.data->rom)/pow(EXERCISE_DURATION/2,(P3_f+P5_f));
-
+          P1_f = (c.data->rom)/pow(EXERCISE_DURATION/2,(P3_f+P5_f)); 
           change_mode=false;
         }
 
@@ -494,13 +497,13 @@ void sensojoint_fes_app::FES_loop(){
         }
 
         if(counter%100==0){
-          cout<< c.data->betafunction_sm[counter]<<endl;
+          cout<< c.data->[counter]<<endl;
         }
 
   //    if exercise is finished, change to case 0
         if(counter>EXERCISE_DURATION){
           //            c.data->controller_config.control_mode!=robot_control_mode::standby;
-          fes_mode = 0;
+          fes_mode = 0; //i.e. standby
           change_mode=true;
         }
       break;
@@ -556,6 +559,8 @@ void sensojoint_fes_app::FES_loop(){
           change_mode=false;
         }
         c.data->controller_config.control_mode=robot_control_mode::transparent_control;
+
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!***CHI CAMBIA IL VALORE DI EMG_SAMPLE A TRUE????***!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if ((emg_samples == true && emg_samples_old == false) || counter==timer+5000){
   //        P0_beta = act_pos;
           pos_act_trig = act_pos;
@@ -573,9 +578,9 @@ void sensojoint_fes_app::FES_loop(){
             //cout << "sono nel for" << endl;
             //                  if((round(pos_act_trig*100)/100)==(round(rad_to_deg*(c.data->betafunction_sm[i])*100))/100){
             if(c.data->betafunction_sm[i]<pos_act_trig<c.data->betafunction_sm[i+50]){
-              index_act_pos = i+50;
+              index_act_pos = i+50; //variable in sensojoint_fes_app.h
               cout << "found trigger at deg: " << c.data->betafunction_sm[i+50] << " at index: " << index_act_pos << endl;
-              c.data->ind_act_pos = index_act_pos;
+              c.data->ind_act_pos = index_act_pos; //write index in shared memory variable ind
               counter_waveform = index_act_pos;
               t_old = counter_waveform;
               i=4950;
@@ -584,7 +589,7 @@ void sensojoint_fes_app::FES_loop(){
             }
           }
         }
-        c.data->controller_config.control_mode=robot_control_mode::impedance_control_beta;
+        c.data->controller_config.control_mode=robot_control_mode::impedance_control_beta; //impedance control nella shared memory
 
         beta_position = c.data->betafunction_sm[counter_waveform];
 
@@ -863,10 +868,12 @@ void sensojoint_fes_app::FES_loop(){
           change_mode = false;
         }
 
-        if (emg_calib == true) {
+        if (emg_calib == true) { 
+          //start the EMG threshold calibration with robot in transparent mode
           c.data->controller_config.control_mode=robot_control_mode::transparent_control;
 
-          if(kbhit()){
+          //if the user press + or - the threshold is increased or decreased by 2
+          if(kbhit()){ 
             char input_char = '0';
             input_char = getchar();
             switch (input_char) {
@@ -881,8 +888,7 @@ void sensojoint_fes_app::FES_loop(){
                 c.data->controller_config.control_mode=robot_control_mode::freeze_control;
                 emg_th_final = emg_th;
                 emg_calib = false;
-
-              break;
+                break;
 
   //          default:
   //             cout << "INVALID INPUT - stopping calibration" << endl;
@@ -1244,10 +1250,10 @@ void sensojoint_fes_app::write_calibration_file(){
   CSV_calibration_file
 
     << 1 << ","
-    << A << ","
-    << B << ","
-    << C << ","
-    << D << ","
+    << A << "," 
+    << B << "," 
+    << C << "," 
+    << D << "," 
 //           << H << ","
 //            << W << ","
 //            << E << "," //coeff_weight_assistance << ","
@@ -1354,9 +1360,10 @@ void sensojoint_fes_app::open_sensojoint_file(){
 
     // Log directory
     strftime (buffer,80,"FES_Knee-%Y-%m-%d-%H-%M-%S.csv",now);
-    CSV_sensojoint_file.open (buffer);
+    CSV_sensojoint_file.open(buffer); //%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!tolto spazio open (buffer)!!!!!
     if(CSV_sensojoint_file.is_open())
     {
+      // PLOG INFO=PLOGI
         PLOGI << "SENSOJOINT Log File Created";
         CSV_sensojoint_file << endl
 
@@ -1402,7 +1409,7 @@ void sensojoint_fes_app::open_sensojoint_file(){
     }
 
     else{
-        PLOGE << "SENSOJOINT Log File Error";
+        PLOGE << "SENSOJOINT Log File Error"; // PLOG ERROR=PLOGE
     }
 }
 
@@ -1498,9 +1505,11 @@ void sensojoint_fes_app::write_ROM_file(){
 
 }
 
-void read_ROM_file( vector <double> &range){
+// Read ROM file: read a specific user calibration file, parse its content, and store it in a vector
+void read_ROM_file(vector <double> &range){
 
     // Open user-specific calibration file
+    // creation of a buffer filled with the path of the file
     char buffer [80];
     snprintf (buffer,80,"/home/esmacat/esmacat_rt/build-release/esmacat_applications/ROM_%s.csv", userID);
     CSV_ROM_read.open(buffer, ios::in);
@@ -1513,60 +1522,48 @@ void read_ROM_file( vector <double> &range){
     // of which the data is required
     int rollnum=1, roll2, count = 0;
 
-
-    // Read the Data from the file
-    // as String Vector
+    // Read the Data from the file as String Vector
     vector<string> row;
     string line, word, temp;
 
-    row.clear();
+    row.clear();// use to remove all elements from the vector
 
-    // read an entire row and
-    // store it in a string variable 'line'
+    // read an entire row and store it in a string variable 'line'
     getline(CSV_ROM_read, line);
-
 
     // used for breaking words
     stringstream s(line);
 
-    // read every column data of a row and
-    // store it in a string variable, 'word'
+    // read every column data of a row and store it in a string variable 'word', until ',' is found
     while (getline(s, word, ',')) {
-
-        // add all the column data
-        // of a row to a vector
+        // add all the column data of a row to the end of the vector
         row.push_back(word);
     }
 
-    // convert string to integer for comparision
+    // convert string (first word) to integer for comparision, assumed to be a roll number
     roll2 = stoi(row[0]);
 
     // Compare the roll number
     if (roll2 == rollnum) {
+      // Print the found data
+      count = 1;
 
-        // Print the found data
-        count = 1;
-
-        range[0]=stod(row[1]);
-        ex_amplitude = range[0];
-
-
+      // second word is converted to a double and stored in the vector range
+      range[0]=stod(row[1]);
+      ex_amplitude = range[0];
     }
 
-    if (count == 0)
-
-        cout << "Record not found\n";// File pointer
-
-
+    if (count == 0) {
+      cout << "Record not found\n";// File pointer
+    }
+    
     if(CSV_ROM_read.is_open())
     {
-        CSV_ROM_read.close();
-        cout << "USER ROM file closed correctly" << endl;
+      CSV_ROM_read.close();
+      cout << "USER ROM file closed correctly" << endl;
     }
 
 }
-
-
 
 void sensojoint_fes_app::generate_betafunction(){
 

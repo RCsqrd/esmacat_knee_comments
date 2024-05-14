@@ -7,16 +7,16 @@
  ****************************************************************************************/
 #include "sensojoint_shared_memory.h"
 
-
 /*****************************************************************************************
  * FUNCTIONS
  ****************************************************************************************/
 sensojoint_shared_memory_comm::sensojoint_shared_memory_comm()
 {
-    key = ftok("/bin",DEFAULT_ROS_KEY_ID);
+    key = ftok("/bin",DEFAULT_ROS_KEY_ID); //key used to identify a shared memory segment
 }
+
 sensojoint_shared_memory_comm::~sensojoint_shared_memory_comm(){
-    detach_shared_memory();
+    detach_shared_memory(); //every time the object is destroyed i.e. 
 }
 
 bool sensojoint_shared_memory_comm::init(){
@@ -35,8 +35,3 @@ void sensojoint_shared_memory_comm::detach_shared_memory(){
     shmdt(data);
     shmctl(shmid,IPC_RMID,NULL);
 }
-
-
-
-
-

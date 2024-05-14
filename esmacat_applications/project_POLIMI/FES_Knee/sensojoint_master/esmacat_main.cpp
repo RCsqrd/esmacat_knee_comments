@@ -19,6 +19,9 @@
 
 int main()
 {
+    /*static means that the appenders are created only once and persist for the lifetime of the program.
+    Write log message to a file and console 80000 is the maximum file size in bytes and 10 is the number of files to keep.
+    */
     //this is defined in my_app.cpp and my_app.h
     static plog::RollingFileAppender<plog::CsvFormatter> fileAppender("esmacat_log.csv", 80000, 10); // Create the 1st appender.
     static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender; // Create the 2nd appender.
